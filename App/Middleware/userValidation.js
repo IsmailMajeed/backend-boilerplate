@@ -1,12 +1,19 @@
+const jwt = require('jsonwebtoken');
+
 function validateUser(req, res, next) {
-  jwt.verify(req.headers['x-access-token'], req.app.get('secretKey'), function (err, decoded) {
+  const token = req.headers['x-access-token'];
+
+  if (!token) {
+    return res.status(401).json({ 'Status': "Authorization", message: "Token not provided" });
+  }
+
+  jwt.verify(token, req.app.get('secretKey'), function (err, decoded) {
     if (err) {
-      res.json({ 'Status': "Authorization", message: err.message })
+      return res.status(401).json({ 'Status': "Authorization", message: err.message });
+    } else {
+      next();
     }
-    else {
-      next()
-    }
-  })
+  });
 }
 
 module.exports = validateUser;
